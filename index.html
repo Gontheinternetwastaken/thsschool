@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta charset="UTF-8">
+<title>Unblkgam Runner</title>
+
+<script src="ruffle/ruffle.js"></script>
+
+<style>
+body{
+font-family: Arial;
+text-align: center;
+background-color:#111;
+color:white;
+}
+
+#gameFrame{
+border:none;
+width:800px;
+height:600px;
+display:none;
+margin:auto;
+}
+
+#gameContainer{
+width:800px;
+height:600px;
+margin:auto;
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Upload a .unblkgam file</h1>
+
+<input type="file" id="fileInput" accept=".unblkgam">
+
+<br><br>
+
+<div id="gameContainer"></div>
+
+<iframe id="gameFrame"></iframe>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
