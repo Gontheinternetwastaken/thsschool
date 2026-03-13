@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 <meta charset="UTF-8">
@@ -9,26 +9,52 @@
 <script src="https://unpkg.com/@ruffle-rs/ruffle"></script>
 
 <style>
-body{
-font-family: Arial;
-text-align:center;
-background:#111;
-color:white;
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #111;
+  color: white;
+  margin: 0;
+  padding: 0;
 }
 
-#gameFrame{
-width:800px;
-height:600px;
-border:none;
-display:none;
-margin:auto;
-background:white;
+/* Game containers */
+#gameFrame,
+#gameContainer {
+  width: 800px;
+  height: 600px;
+  margin: auto;
+  position: relative;
 }
 
-#gameContainer{
-width:800px;
-height:600px;
-margin:auto;
+#gameFrame {
+  border: none;
+  display: none;
+  background: white;
+}
+
+#gameContainer {
+  margin-top: 10px;
+}
+
+/* Floating fullscreen button */
+#fullscreenBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 9999;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.8);
+  color: #111;
+  border: none;
+  border-radius: 5px;
+}
+
+#uploadContainer {
+  position: relative;
+  display: inline-block;
 }
 </style>
 
@@ -38,15 +64,96 @@ margin:auto;
 
 <h2>Upload a .unblkgam file</h2>
 
-<input type="file" id="fileInput" accept=".unblkgam">
+<div id="uploadContainer">
+  <input type="file" id="fileInput" accept=".unblkgam">
+  <button id="fullscreenBtn">Fullscreen</button>
+</div>
 
 <br><br>
 
 <div id="gameContainer"></div>
 <iframe id="gameFrame"></iframe>
 
-<script src="script.js"></script>
+<script>
+const fileInput = document.getElementById("fileInput");
+const gameFrame = document.getElementById("gameFrame");
+const gameContainer = document.getElementById("gameContainer");
+const fullscreenBtn = document.getElementById("fullscreenBtn");
+
+// Handle file upload
+fileInput.addEventListener("change", async (event) => {
+
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const buffer = await file.arrayBuffer();
+  const header = new TextDecoder().decode(buffer.slice(0,3));
+
+  if(header === "FWS" || header === "CWS" || header === "ZWS"){
+    runSWF(buffer);
+  } else {
+    runHTML(buffer);
+  }
+
+});
+
+// Run HTML games
+function runHTML(buffer){
+
+  gameContainer.innerHTML = "";
+  const htmlText = new TextDecoder().decode(buffer);
+
+  gameFrame.style.display = "block";
+  gameFrame.srcdoc = htmlText;
+
+}
+
+// Run SWF games using Ruffle
+function runSWF(buffer){
+
+  gameFrame.style.display = "none";
+  gameFrame.srcdoc = "";
+
+  gameContainer.innerHTML = "";
+
+  const swfBlob = new Blob([buffer], {type:"application/x-shockwave-flash"});
+  const url = URL.createObjectURL(swfBlob);
+
+  const ruffle = window.RufflePlayer.newest();
+  const player = ruffle.createPlayer();
+
+  player.style.width = "800px";
+  player.style.height = "600px";
+
+  gameContainer.appendChild(player);
+
+  player.load(url);
+
+}
+
+// Fullscreen button functionality
+fullscreenBtn.addEventListener("click", () => {
+
+  let elem = null;
+
+  if(gameFrame.style.display !== "none"){
+    elem = gameFrame; // HTML game
+  } else if(gameContainer.children.length > 0){
+    elem = gameContainer; // SWF game
+  }
+
+  if(elem){
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen();
+    } else if (elem.webkitRequestFullscreen) { /* Safari */
+      elem.webkitRequestFullscreen();
+    } else if (elem.msRequestFullscreen) { /* IE11 */
+      elem.msRequestFullscreen();
+    }
+  }
+
+});
+</script>
 
 </body>
-
 </html>
