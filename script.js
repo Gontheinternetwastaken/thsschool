@@ -8,8 +8,7 @@ const file = event.target.files[0];
 if(!file) return;
 
 const buffer = await file.arrayBuffer();
-const bytes = new Uint8Array(buffer.slice(0,3));
-const header = new TextDecoder().decode(bytes);
+const header = new TextDecoder().decode(buffer.slice(0,3));
 
 if(header === "FWS" || header === "CWS" || header === "ZWS"){
 runSWF(buffer);
@@ -22,19 +21,18 @@ runHTML(buffer);
 function runHTML(buffer){
 
 gameContainer.innerHTML = "";
+
+const htmlText = new TextDecoder().decode(buffer);
+
 gameFrame.style.display = "block";
-
-const htmlBlob = new Blob([buffer], {type:"text/html"});
-const url = URL.createObjectURL(htmlBlob);
-
-gameFrame.src = url;
+gameFrame.srcdoc = htmlText;
 
 }
 
 function runSWF(buffer){
 
 gameFrame.style.display = "none";
-gameFrame.src = "";
+gameFrame.srcdoc = "";
 
 gameContainer.innerHTML = "";
 
