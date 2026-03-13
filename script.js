@@ -2,48 +2,44 @@ const fileInput = document.getElementById("fileInput");
 const gameFrame = document.getElementById("gameFrame");
 const gameContainer = document.getElementById("gameContainer");
 
-fileInput.addEventListener("change", async function(e){
+fileInput.addEventListener("change", async (event) => {
 
-const file = e.target.files[0];
+const file = event.target.files[0];
 if(!file) return;
 
 const buffer = await file.arrayBuffer();
-const header = new TextDecoder().decode(buffer.slice(0,3));
+const bytes = new Uint8Array(buffer.slice(0,3));
+const header = new TextDecoder().decode(bytes);
 
 if(header === "FWS" || header === "CWS" || header === "ZWS"){
-runSWF(file);
+runSWF(buffer);
 }else{
-runHTML(file);
+runHTML(buffer);
 }
 
 });
 
-function runHTML(file){
+function runHTML(buffer){
 
 gameContainer.innerHTML = "";
 gameFrame.style.display = "block";
 
-const reader = new FileReader();
-
-reader.onload = function(){
-
-const htmlBlob = new Blob([reader.result], {type: "text/html"});
+const htmlBlob = new Blob([buffer], {type:"text/html"});
 const url = URL.createObjectURL(htmlBlob);
 
 gameFrame.src = url;
 
-};
-
-reader.readAsText(file);
-
 }
 
-function runSWF(file){
+function runSWF(buffer){
 
 gameFrame.style.display = "none";
 gameFrame.src = "";
 
 gameContainer.innerHTML = "";
+
+const swfBlob = new Blob([buffer], {type:"application/x-shockwave-flash"});
+const url = URL.createObjectURL(swfBlob);
 
 const ruffle = window.RufflePlayer.newest();
 const player = ruffle.createPlayer();
@@ -53,7 +49,6 @@ player.style.height = "600px";
 
 gameContainer.appendChild(player);
 
-const url = URL.createObjectURL(file);
 player.load(url);
 
 }
