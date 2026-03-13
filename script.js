@@ -23,8 +23,18 @@ function runHTML(file){
 gameContainer.innerHTML = "";
 gameFrame.style.display = "block";
 
-const url = URL.createObjectURL(file);
+const reader = new FileReader();
+
+reader.onload = function(){
+
+const htmlBlob = new Blob([reader.result], {type: "text/html"});
+const url = URL.createObjectURL(htmlBlob);
+
 gameFrame.src = url;
+
+};
+
+reader.readAsText(file);
 
 }
 
